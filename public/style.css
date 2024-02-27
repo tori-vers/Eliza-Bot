@@ -1,0 +1,24 @@
+body {
+    text-align: center;
+}
+
+h1 {
+    font-size: 36px;
+}
+
+input[type="text"] {
+    font-size: 30px;
+}
+
+#elizaResponse {
+    font-size: 30px;
+}
+
+#Send {
+    font-size: 26px;
+}
+
+input[type="text"], #elizaResponse {
+    display: block;
+    margin: 0 auto;
+}

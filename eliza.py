@@ -1,6 +1,7 @@
 import logging
 import random
 import re
+import sys
 from collections import namedtuple
 
 # Fix Python2/Python3 incompatibility
@@ -227,9 +228,15 @@ class Eliza:
 
 
 def main():
+    if len(sys.argv) > 1:
+        userInput = sys.argv[1]
+    else:
+        print("No input provided")
+        sys.exit(1)
+
     eliza = Eliza()
     eliza.load('doctor.txt')
-    eliza.run()
+    print(eliza.respond(userInput))
 
 if __name__ == '__main__':
     logging.basicConfig()
