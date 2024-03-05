@@ -4,11 +4,18 @@ let listeningIndicatorInterval;
 let isSpeechMode = false; // Flag to track the selected input mode
 let isBotListening = false;
 
-document.getElementById('userInput').addEventListener('keyup', function (event) {
-    if (event.key === 'Enter') {
-        sendToEliza();
+if (typeof window !== 'undefined' && typeof window.document !== 'undefined') {
+    window.addEventListener('DOMContentLoaded', (event) => {
+        const userInputElem = document.getElementById('userInput');
+        if (userInputElem) {
+          userInputElem.addEventListener('keyup', function (event) {
+            if (event.key === 'Enter') {
+              sendToEliza();
+            }
+        });
     }
 });
+}
 
 // Function to toggle between text and speech input mode
 function toggleInputMode() {
@@ -40,30 +47,7 @@ function toggleInputMode() {
     if (!isSpeechMode) {
         stopSpeechRecognitionEngine();
     }
-}function sendToEliza() {
-    const userInput = document.getElementById('userInput').value;
 
-    if (!userInput) {
-        return; 
-    }
-
-    const timestamp = getCurrentTimestamp();
-
-    chatHistory.push({ sender: 'User', message: userInput, timestamp });
-    updateChatDisplay();
-
-    document.getElementById('userInput').value = '';
-    isBotListening = true;
-    updateChatDisplay();
-
-    fetch(`/eliza?input=${encodeURIComponent(userInput)}`)
-        .then(response => response.text())
-        .then(data => {
-            isBotListening = false;
-            chatHistory.push({ sender: 'Eliza', message: data, timestamp });
-            updateChatDisplay();
-        })
-        .catch(error => console.error('Error:', error));
 }
 
 function updateChatDisplay() {
@@ -173,32 +157,49 @@ function stopSpeechRecognitionEngine() {
 
 // Update the sendToEliza function to handle both text and speech input
 function sendToEliza() {
-    let userInput = document.getElementById('userInput').value;
-
-    if (!userInput) {
-        return; // Don't send empty messages
-    }
-
-    const timestamp = getCurrentTimestamp();
-
-    // Add user input to chat history
-    chatHistory.push({ sender: 'User', message: userInput, timestamp });
-
-    // Update the chat display
-    updateChatDisplay();
-
-    // Clear the user input
-    document.getElementById('userInput').value = '';
-
-    // Send user input to Eliza
-    fetch(`/eliza?input=${encodeURIComponent(userInput)}`)
+    let userInputElem = document.getElementById('userInput');
+    if (userInputElem) {
+      const userInput = userInputElem.value;
+  
+      if (!userInput) {
+        return Promise.resolve; // Don't send empty messages
+      }
+  
+      const timestamp = getCurrentTimestamp();
+  
+      // Add user input to chat history
+      chatHistory.push({ sender: 'User', message: userInput, timestamp });
+  
+      // Update the chat display
+      updateChatDisplay();
+  
+      // Clear the user input
+      userInputElem.value = '';
+      isBotListening = true;
+      updateChatDisplay();
+  
+      // Send user input to Eliza
+       return fetch(`/eliza?input=${encodeURIComponent(userInput)}`)
         .then(response => response.text())
         .then(data => {
-            // Add Eliza's response to chat history
-            chatHistory.push({ sender: 'Eliza', message: data, timestamp });
-
-            // Update the chat display
-            updateChatDisplay();
+          isBotListening = false;
+          // Add Eliza's response to chat history
+          chatHistory.push({ sender: 'Eliza', message: data, timestamp });
+  
+          // Update the chat display
+          updateChatDisplay();
         })
-        .catch(error => console.error('Error:', error));
-};
+        .catch(error => {
+             console.error('Error:', error);
+             return Promise.reject(error);
+        });
+    } else {
+        return Promise.resolve();
+    }
+  }
+
+module.exports = {
+    chatHistory,
+    updateChatDisplay,
+    sendToEliza
+}
