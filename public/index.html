@@ -1,49 +1,145 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eliza Chatbot</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+<title>Eliza ChatBot 2.0</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif}
+.w3-row-padding img {margin-bottom: 12px}
+/* Set the width of the sidebar to 120px */
+.w3-sidebar {width: 120px;background: #222;}
+/* Add a left margin to the "page content" that matches the width of the sidebar (120px) */
+#main {margin-left: 120px}
+/* Remove margins from "page content" on small screens */
+@media only screen and (max-width: 600px) {#main {margin-left: 0}}
+</style>
 </head>
-<body>
-    <div class="container">
-        <h1>Chat with Eliza</h1>
+<body class="w3-black">
 
-        <!-- Explanation Section -->
-        <div id="purpose-section">
-            <p>This website allows you to tell Eliza how you are feeling. You can express yourself through text by typing in the text bar or through speech by clicking the microphone icon.</p>
-        </div>
+<nav class="w3-sidebar w3-bar-block w3-small w3-hide-small w3-center">
+    <!-- Avatar image in top left corner -->
+    <img src="ElizaCharacter.jpeg" style="width:100%">
+    <a href="#home" class="w3-bar-item w3-button w3-padding-large w3-black">
+      <i class="fa fa-home w3-xxlarge"></i>
+      <p>HOME</p>
+    </a>
+    <a href="#text" class="w3-bar-item w3-button w3-padding-large w3-hover-black">
+      <i class="fa fa-comments w3-xxlarge"></i> <!-- Changed icon to comments -->
+      <p>CHAT</p> <!-- Changed text to "TEXT" -->
+    </a>
+    <a href="#chathistory" class="w3-bar-item w3-button w3-padding-large w3-hover-black">
+      <i class="fa fa-eye w3-xxlarge"></i>
+      <p>CHAT HISTORY</p>
+    </a>
+  </nav>
 
-        <!-- Chat Container -->
-        <div id="chat-container">
-            <div id="eliza-visual"></div>
-            <div id="chat-log-container">
-                <div class="log-header">Chat Log</div>
-                <div id="chat-history-container"></div>
-            </div>
+<!-- Navbar on small screens (Hidden on medium and large screens) -->
+<div class="w3-top w3-hide-large w3-hide-medium" id="myNavbar">
+  <div class="w3-bar w3-black w3-opacity w3-hover-opacity-off w3-center w3-small">
+    <a href="#home" class="w3-bar-item w3-button" style="width:25% !important">HOME</a>
+    <a href="#text" class="w3-bar-item w3-button" style="width:25% !important">CHAT</a>
+    <a href="#chathistory" class="w3-bar-item w3-button" style="width:25% !important">CHAT HISTORY</a>
+  </div>
+</div>
 
-            <div id="chat-history">
-                <div id="listening-indicator"></div>
-                <button id="history-btn" onclick="showChatHistory()">Chat History</button>
-            </div>
+<!-- Page Content -->
+<div class="w3-padding-large" id="main">
+  <!-- Header/Home -->
+  <header class="w3-container w3-padding-32 w3-center w3-black" id="home">
+    <h1 class="w3-jumbo"><span class="w3-hide-small">Eliza</span> ChatBot</h1>
+    <p>Welcome to our website!
 
-            <div id="chat-container">
-                <div id="chat-history-container"></div>
-            
-                <div id="eliza-visual"></div>
-            
-                <div id="input-container">
-                    <input type="text" id="userInput" placeholder="Say something to Eliza...">
-                    <button id="sendBtn" onclick="sendToEliza()">Send</button>
-                    <button id="speech-btn" onclick="startSpeechRecognition()">Mic</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="elizaResponse"></div>
+        We're thrilled to introduce you to Eliza, your personal chatbot companion. You're invited to share your thoughts and feelings with Eliza, whether through text or voice. Let Eliza be your confidante, providing a listening ear and offering support whenever you need it.
+        
+        Join us in exploring the power of conversation. Whether you're typing out your emotions or speaking them aloud, Eliza is here to listen and engage with you every step of the way.</p>
+    <img src="ElizaCharacter.jpeg" alt="Eliza" class="w3-image" style="width:300px;height:300px;border-radius:50%">
+    
+    <!-- Login Section -->
+    <div class="w3-container w3-padding-24">
+      <h2 class="w3-text-light-grey">Log In</h2>
+      <form action="/login" method="post" class="w3-container">
+        <p><input class="w3-input w3-padding-16" type="text" placeholder="Username" required name="username"></p>
+        <p><input class="w3-input w3-padding-16" type="password" placeholder="Password" required name="password"></p>
+        <p>
+          <button class="w3-button w3-light-grey w3-padding-large" type="submit">Log In</button>
+        </p>
+      </form>
     </div>
+  </header>
 
-    <script src="script.js"></script>
+  <div id="text" style="display: none;"> <!-- Chat section -->
+    <h2 class="w3-text-light-grey">Chat Log</h2>
+    <hr style="width:200px" class="w3-opacity">
+    <div id="chat-history-container" class="w3-content" style="max-height: 300px; overflow-y: scroll;">
+        <!-- Chat log will be displayed here -->
+    </div>
+    <div id="input-container" class="w3-container w3-padding-24">
+        <h2 class="w3-text-light-grey">Chat with Eliza</h2>
+        <input id="userInput" class="w3-input w3-padding-16" type="text" placeholder="Type your message here..." required>
+        <button id="send-button" class="w3-button w3-light-grey w3-padding-large">Send</button> <!-- Send button -->
+        <button id="speech-btn" class="w3-button w3-light-grey w3-padding-large">Speech</button>
+        <div id="listening-indicator"></div>
+    </div>
+</div>
+  
+  <!-- Photos Section -->
+  <div class="w3-padding-64 w3-content" id="chathistory">
+    <h2 class="w3-text-light-grey">Chat History</h2>
+    <hr style="width:200px" class="w3-opacity">
+    <div class="w3-row-padding" style="margin:0 -16px">
+      <div class="w3-half">
+        <button id="date-btn" class="w3-button w3-light-grey w3-padding-large">Search by Date</button> <!-- Date selection button -->
+      </div>
+      <div class="w3-half">
+        <img src="photo4.jpg" style="width:100%">
+        <img src="photo5.jpg" style="width:100%">
+        <img src="photo6.jpg" style="width:100%">
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Section -->
+  <div class="w3-padding-64 w3-content w3-text-grey" id="contact">
+    <h2 class="w3-text-light-grey">Contact Us</h2>
+    <hr style="width:200px" class="w3-opacity">
+    <p>Provide contact information and a contact form.</p>
+  </div>
+  
+  <!-- Footer -->
+  <footer class="w3-content w3-padding-64 w3-text-grey w3-xlarge">
+    <i class="fa fa-facebook-official w3-hover-opacity"></i>
+    <i class="fa fa-instagram w3-hover-opacity"></i>
+    <i class="fa fa-snapchat w3-hover-opacity"></i>
+    <i class="fa fa-pinterest-p w3-hover-opacity"></i>
+    <i class="fa fa-twitter w3-hover-opacity"></i>
+    <i class="fa fa-linkedin w3-hover-opacity"></i>
+    <p class="w3-medium">Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank" class="w3-hover-text-green">w3.css</a></p>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const tabs = document.querySelectorAll('.w3-bar-item');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function(event) {
+          const targetId = this.getAttribute('href');
+          const targetSection = document.querySelector(targetId);
+          if (targetSection) {
+            // Hide all sections
+            document.querySelectorAll('.w3-content').forEach(section => {
+              section.style.display = 'none';
+            });
+            // Show the target section
+            targetSection.style.display = 'block';
+          }
+          
+        });
+      });
+    });
+  </script>
+</div>
 </body>
 </html>

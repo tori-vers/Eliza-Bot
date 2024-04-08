@@ -5,7 +5,17 @@ body {
     color: var(--text-light);
     transition: background-color 0.5s, color 0.5s;
 }
+#eliza-visual {
+    width: 200px; /* Adjust width as needed */
+    margin-left: 20px; /* Add margin to separate it from the chat container */
+}
 
+#eliza-visual img {
+    max-width: 100%; /* Ensure the image stays within the container */
+    height: auto; /* Maintain aspect ratio */
+    display: block; /* Prevent any extra space caused by image alignment */
+    border-radius: 10px; /* Optional: Add border radius for a rounded appearance */
+}
 .container {
     max-width: 600px;
     margin: 0 auto;
