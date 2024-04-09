@@ -83,7 +83,17 @@ button {
    border: 1px solid #ddd;
    border-radius: 5px;
 }
+.centered {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   margin-top: 20px; /* Adjust margin as needed */
+}
 
+#input-container input[type="text"],
+#input-container button {
+   margin: 5px; /* Adjust margin between elements as needed */
+}
 
 #sendBtn {
    font-size: 16px;
