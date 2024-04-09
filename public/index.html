@@ -74,13 +74,12 @@ body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif}
   <!-- Header/Home -->
   <header class="w3-container w3-padding-32 w3-center w3-black" id="home">
     <h1 class="w3-jumbo"><span class="w3-hide-small">Eliza</span> ChatBot</h1>
-    <p>Welcome to our website!
-
-
-        We're thrilled to introduce you to Eliza, your personal chatbot companion. You're invited to share your thoughts and feelings with Eliza, whether through text or voice. Let Eliza be your confidante, providing a listening ear and offering support whenever you need it.
+    <p>Welcome to our website!</p>
+    <img src="ElizaCharacter.jpg" alt="Eliza" class="w3-image" style="width:50%;max-width:600px;height:auto;">
+       <p>We're thrilled to introduce you to Eliza, your personal chatbot companion! You're invited to share your thoughts and feelings with Eliza, whether through text or voice. Let Eliza be your confidante, providing a listening ear and offering support whenever you need it.
        
         Join us in exploring the power of conversation. Whether you're typing out your emotions or speaking them aloud, Eliza is here to listen and engage with you every step of the way.</p>
-    <img src="ElizaCharacter.jpg" alt="Eliza" class="w3-image" style="width:50%;max-width:600px;height:auto;">
+    
   </header>
 
   
@@ -106,8 +105,22 @@ body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif}
     <!-- Placeholder for displaying chat history fetched from database -->
     <div id="chat-history-container"></div>
   </div>
+<!-- Calendar Structure -->
+<div id="calendar-search">
+    <input type="date" id="calendar-date">
+    <button id="search-button">Search</button>
+</div>
 
-  
+        <tbody id="calendar-body">
+            <!-- Calendar dates will be dynamically generated here -->
+        </tbody>
+    </table>
+</div>
+<div id="conversation-results">
+    <!-- Conversation results will be displayed here -->
+</div>
+<!-- Add a blank section after the chat history -->
+<div id="blank-section"></div>
 
 <!-- END PAGE CONTENT -->
 </div>

@@ -253,6 +253,19 @@ button {
     cursor: pointer;
     z-index: 1000;
 }
+/* Login Button Styles */
+#login-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background-color: #008CBA;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1000;
+}
 
 /* Popup Styles */
 .popup {
@@ -286,3 +299,8 @@ button {
     font-size: 24px;
     cursor: pointer;
 }
+
+  #blank-section {
+    height: 400px; /* Adjust the height as needed */
+    background-color: transparent; /* Optional: Change the background color */
+  }

@@ -229,19 +229,69 @@ module.exports = {
    updateChatDisplay,
    sendToEliza
 }
-// Open login popup when login button is clicked
-document.getElementById('login-button').addEventListener('click', function() {
-    document.getElementById('login-popup').style.display = 'block';
-});
-
-// Close login popup when close button is clicked
-document.querySelector('.close-button').addEventListener('click', function() {
-    document.getElementById('login-popup').style.display = 'none';
-});
-
-// Close login popup when clicking outside of it
-window.addEventListener('click', function(event) {
-    if (event.target === document.getElementById('login-popup')) {
-        document.getElementById('login-popup').style.display = 'none';
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarDateInput = document.getElementById('calendar-date');
+    const searchButton = document.getElementById('search-button');
+    const miniCalendar = document.getElementById('mini-calendar');
+    const monthYearDisplay = document.getElementById('month-year');
+    const calendarBody = document.getElementById('calendar-body');
+  
+    let currentDate = new Date();
+  
+    function generateCalendar(year, month) {
+      // Clear previous calendar
+      calendarBody.innerHTML = '';
+      monthYearDisplay.textContent = `${getMonthName(month)} ${year}`;
+      
+      const firstDayOfMonth = new Date(year, month, 1);
+      const lastDayOfMonth = new Date(year, month + 1, 0);
+      const daysInMonth = lastDayOfMonth.getDate();
+      const startingDay = firstDayOfMonth.getDay();
+  
+      let date = 1;
+  
+      for (let i = 0; i < 6; i++) {
+        const row = document.createElement('tr');
+        for (let j = 0; j < 7; j++) {
+          if (i === 0 && j < startingDay) {
+            const cell = document.createElement('td');
+            row.appendChild(cell);
+          } else if (date > daysInMonth) {
+            break;
+          } else {
+            const cell = document.createElement('td');
+            cell.textContent = date;
+            cell.dataset.date = `${year}-${padZero(month + 1)}-${padZero(date)}`;
+            cell.addEventListener('click', handleDateClick);
+            row.appendChild(cell);
+            date++;
+          }
+        }
+        calendarBody.appendChild(row);
+      }
     }
-});
+  
+    function getMonthName(month) {
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      return monthNames[month];
+    }
+  
+    function padZero(num) {
+      return num < 10 ? `0${num}` : num;
+    }
+  
+    function handleDateClick(event) {
+      const selectedDate = event.target.dataset.date;
+      calendarDateInput.value = selectedDate;
+    }
+  
+    function searchConversations() {
+      const selectedDate = calendarDateInput.value;
+      // Implement conversation search based on selected date
+    }
+  
+    searchButton.addEventListener('click', searchConversations);
+  
+    // Initial calendar generation
+    generateCalendar(currentDate.getFullYear(), currentDate.getMonth());
+  });
