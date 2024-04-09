@@ -37,8 +37,11 @@ body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif}
   <a href="#chat-history" class="w3-bar-item w3-button w3-padding-large w3-hover-black">
     <i class="fa fa-history w3-xxlarge"></i>
     <p>CHAT HISTORY</p>
-  </a>
-</nav>
+    <a href="login.html" class="w3-bar-item w3-button w3-padding-large w3-hover-black">
+      <i class="fa fa-sign-in w3-xxlarge"></i>
+      <p>LOGIN</p>
+    </a>
+  </nav>
 
 <!-- Navbar on small screens (Hidden on medium and large screens) -->
 <div class="w3-top w3-hide-large w3-hide-medium" id="myNavbar">
@@ -48,27 +51,7 @@ body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif}
     <a href="#chat-history" class="w3-bar-item w3-button" style="width:33% !important">CHAT HISTORY</a>
   </div>
 </div>
-<!-- Login Button -->
-<button id="login-button">Login</button>
 
-<!-- Login Popup -->
-<div id="login-popup" class="popup">
-    <div class="popup-content">
-        <span class="close-button">&times;</span>
-        <h2>Login</h2>
-        <form id="login-form" action="/login" method="post">
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit">Login</button>
-        </form>
-    </div>
-</div>
 <!-- Page Content -->
 <div class="w3-padding-large" id="main">
   <!-- Header/Home -->
@@ -81,7 +64,7 @@ body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif}
         Join us in exploring the power of conversation. Whether you're typing out your emotions or speaking them aloud, Eliza is here to listen and engage with you every step of the way.</p>
     
   </header>
-
+  <div id="blank-section"></div>
   
   <!-- Chat Section -->
   <div class="w3-content w3-justify w3-text-grey w3-padding-64" id="chat">
@@ -97,7 +80,7 @@ body, h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif}
         <button id="speech-btn" onclick="startSpeechRecognition()">Mic</button>
     </div>
   </div>
-
+  <div id="blank-section"></div>
   <!-- Chat History Section -->
   <div class="w3-padding-64 w3-content" id="chat-history">
     <h2 class="w3-text-light-grey">Chat History</h2>
