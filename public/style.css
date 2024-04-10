@@ -268,3 +268,12 @@ button {
     height: 400px; /* Adjust the height as needed */
     background-color: transparent; /* Optional: Change the background color */
   }
+
+  #virtual-human-container, #virtual-human  {
+   max-width: 600px; /* Match the width of the chat log container */
+    height: 500px; /* Match the height of the chat log container */
+    border-radius: 20px;
+    /* Additional styles to center the video */
+    display: block;
+    margin: 0 auto;
+  }

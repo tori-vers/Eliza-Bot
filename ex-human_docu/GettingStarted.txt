@@ -1,0 +1,21 @@
+Getting Started with Digital Humans
+This page will help you get started with Ex-Human API
+
+Ex-Human API
+Ex-Human is a Digital Human Platform that allows anyone to create interactive AI Humans supporting hyper-realistic conversations. This API provides developers with access to a wide range of tools and features for building interactive AI Humans.
+
+Authentication
+First, create a Bearer token at https://admin.exh.ai/. To authenticate your requests, include the Bearer token in the Authorization header of your HTTP requests. The header should have the following format: Authorization: Bearer <your-token>.
+
+Chatbot Services
+We offer two services for language interaction:
+
+get_response returns the response from the bot to the user message within a dialog
+get_smart_replies returns several suggested responses for user to continue the conversation
+Both services require a dialog context. You can also pass persona facts and bot name to customize your Digital Human.
+
+Talking Heads Services
+We also offer two services for generating videos of AI Humans:
+
+create_bot takes a photo as input and returns a link to a video with an animated AI Human, which is called idle_url
+generate_lipsync takes idle_url, text and voice as input, and generates a lip-synced video of an AI Human speaking the text. The default character limit per request is 200. Please contact us at support@exh.ai to request an increase

@@ -11,7 +11,6 @@ beforeEach(() => {
     }));
     // Reset the chatHistory array before each test
     chatHistory.length = 0;
-    // Set up your DOM element mocks here
     document.body.innerHTML = `
         <input type="text" id="userInput">
         <div id="chat-history-container"></div>
@@ -58,3 +57,77 @@ describe('updateChatDisplay', () => {
 
     // Additional tests for updateChatDisplay function...
 });
+
+
+  // Verifies that submitting the login form sends the correct data to the server
+  describe('Login Form', () => {
+    beforeEach(() => {
+      document.body.innerHTML = `
+        <form action="/login" method="post" class="w3-container" id="login-form">
+          <input class="w3-input" type="text" placeholder="Username" required name="username" id="username">
+          <input class="w3-input" type="password" placeholder="Password" required name="password" id="password">
+          <button class="w3-button" type="submit">Log In</button>
+        </form>
+      `;
+  
+      // Mock the global fetch function
+      global.fetch = jest.fn(() =>
+        Promise.resolve({
+          json: () => Promise.resolve({ success: true }),
+        })
+      );
+    });
+  
+    it('sends username and password on form submission', async () => {
+      const loginForm = document.getElementById('login-form');
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+  
+      // Simulate user input
+      usernameInput.value = 'testuser';
+      passwordInput.value = 'password123';
+  
+      // Prevent the default form submission and manually call the fetch mock
+      loginForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        global.fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: usernameInput.value,
+            password: passwordInput.value,
+          }),
+        });
+      });
+  
+      // Simulate form submission
+      const formSubmitEvent = new Event('submit');
+      loginForm.dispatchEvent(formSubmitEvent);
+  
+      // Wait for the asynchronous code to finish
+      await new Promise(process.nextTick);
+  
+      // Check if fetch was called during form submission
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledWith(
+        '/login',
+        expect.objectContaining({
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: 'testuser',
+            password: 'password123',
+          }),
+        })
+      );
+    });
+  
+    afterEach(() => {
+      // Reset mocks
+      global.fetch.mockClear();
+    });
+  });

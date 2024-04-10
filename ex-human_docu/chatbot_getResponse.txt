@@ -1,0 +1,110 @@
+Get Response
+POST
+https://api.exh.ai/chatbot/v2/get_response
+RECENT REQUESTS
+TIME	STATUS	USER AGENT	
+Make a request to see history.
+0 Requests This Month
+
+BODY PARAMS
+context
+array of objects
+The context of the conversation
+
+
+OBJECT
+
+turn
+string
+required
+The turn of the message (bot or user)
+
+message
+string
+required
+
+ADD OBJECT
+user_id
+string
+Unique user identifier. Used for AB tests.
+
+persona_facts
+array of strings
+The persona facts of the chatbot
+
+
+STRING
+
+
+ADD STRING
+bot_name
+string
+The name of the chatbot. The bot will identify with this name.
+
+user_name
+string
+User's name
+
+user_facts
+array of strings
+The persona facts of the user
+
+
+STRING
+
+
+ADD STRING
+dialog_prefix
+array of objects
+Dialog prefix is used as an example of a good conversation
+
+
+OBJECT
+
+turn
+string
+required
+The turn of the message (bot or user)
+
+message
+string
+required
+
+OBJECT
+
+turn
+string
+required
+The turn of the message (bot or user)
+
+message
+string
+required
+
+ADD OBJECT
+nsfw
+boolean
+For enabling NSFW dialog support, set the flag to 'True'; otherwise, set it to 'False'.
+
+
+true
+RESPONSES
+
+200
+Successful Response
+
+
+422
+Validation Error
+
+Example Fetch Request:
+const options = {
+  method: 'POST',
+  headers: {accept: 'application/json', 'content-type': 'application/json'},
+  body: JSON.stringify({nsfw: true})
+};
+
+fetch('https://api.exh.ai/chatbot/v2/get_response', options)
+  .then(response => response.json())
+  .then(response => console.log(response))
+  .catch(err => console.error(err));

@@ -1,0 +1,25 @@
+Create Bot V3
+POST
+https://api.exh.ai/animations/v3/create_bot
+Takes an image as input and returns a link to a video with an animated AI Human, which is called idle_url.
+
+RECENT REQUESTS
+TIME	STATUS	USER AGENT	
+Make a request to see history.
+0 Requests This Month
+
+BODY PARAMS
+image
+file
+required
+
+Fetch Request Example:
+const options = {
+  method: 'POST',
+  headers: {accept: 'application/json', 'content-type': 'multipart/form-data'}
+};
+
+fetch('https://api.exh.ai/animations/v3/create_bot', options)
+  .then(response => response.json())
+  .then(response => console.log(response))
+  .catch(err => console.error(err));
