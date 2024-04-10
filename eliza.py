@@ -2,6 +2,7 @@ import logging
 import random
 import re
 import sys
+import openai
 from collections import namedtuple
 
 # Fix Python2/Python3 incompatibility
@@ -10,6 +11,12 @@ except NameError: pass
 
 log = logging.getLogger(__name__)
 
+# Initialize the logger
+logging.basicConfig(level=logging.DEBUG)  # Set the logging level as needed
+log = logging.getLogger(__name__)  # Instantiate a logger object
+
+# Initialize OpenAI API with your API key
+openai.api_key = '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'
 
 class Key:
     def __init__(self, word, weight, decomps):
@@ -27,7 +34,8 @@ class Decomp:
 
 
 class Eliza:
-    def __init__(self):
+    def __init__(self, openai_api_key):
+        self.openai_api_key = openai_api_key
         self.initials = []
         self.finals = []
         self.quits = []
@@ -36,6 +44,14 @@ class Eliza:
         self.synons = {}
         self.keys = {}
         self.memory = []
+
+    def generate_gpt_response(self, prompt):
+        response = openai.Completion.create(
+            engine="text-davinci-003",  # Choose the GPT model you want to use
+            prompt=prompt,
+            max_tokens=50  # Adjust as needed
+        )
+        return response.choices[0].text.strip()
 
     def load(self, path):
         key = None
@@ -234,7 +250,8 @@ def main():
         print("No input provided")
         sys.exit(1)
 
-    eliza = Eliza()
+    
+    eliza = Eliza(openai_api_key='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')
     eliza.load('doctor.txt')
     print(eliza.respond(userInput))
 
