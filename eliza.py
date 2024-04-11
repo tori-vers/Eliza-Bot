@@ -6,24 +6,23 @@ import openai
 from collections import namedtuple
 
 # Fix Python2/Python3 incompatibility
-try: input = raw_input
-except NameError: pass
-
-log = logging.getLogger(__name__)
+try:
+    input = raw_input
+except NameError:
+    pass
 
 # Initialize the logger
-logging.basicConfig(level=logging.DEBUG)  # Set the logging level as needed
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)  # Set the logging level as needed
 log = logging.getLogger(__name__)  # Instantiate a logger object
 
-# Initialize OpenAI API with your API key
-openai.api_key = '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'
+# Initialize OpenAI API
+openai.api_key = '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'
 
 class Key:
     def __init__(self, word, weight, decomps):
         self.word = word
         self.weight = weight
         self.decomps = decomps
-
 
 class Decomp:
     def __init__(self, parts, save, reasmbs):
@@ -32,10 +31,8 @@ class Decomp:
         self.reasmbs = reasmbs
         self.next_reasmb_index = 0
 
-
 class Eliza:
-    def __init__(self, openai_api_key):
-        self.openai_api_key = openai_api_key
+    def __init__(self):
         self.initials = []
         self.finals = []
         self.quits = []
@@ -45,13 +42,26 @@ class Eliza:
         self.keys = {}
         self.memory = []
 
-    def generate_gpt_response(self, prompt):
-        response = openai.Completion.create(
-            engine="text-davinci-003",  # Choose the GPT model you want to use
-            prompt=prompt,
-            max_tokens=50  # Adjust as needed
-        )
-        return response.choices[0].text.strip()
+    def generate_gpt_response(self, prompt, max_retries=3, retry_delay=5):
+        retries = 0
+        while retries < max_retries:
+            try:
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=60,
+                    n=1,
+                    stop=None,
+                    temperature=0.7,
+                )
+                return response.choices[0].message['content'].strip()
+            except openai.error.RateLimitError as e:
+                if retries < max_retries - 1:
+                    retries += 1
+                    print(f"Rate limit exceeded. Retrying in {retry_delay} seconds... (Attempt {retries}/{max_retries})")
+                    time.sleep(retry_delay)
+                else:
+                    raise e
 
     def load(self, path):
         key = None
@@ -133,6 +143,8 @@ class Eliza:
 
     def _reassemble(self, reasmb, results):
         output = []
+        log.debug('Reassembling: %s', reasmb)
+        log.debug('Output before reassembly: %s', output)
         for reword in reasmb:
             if not reword:
                 continue
@@ -148,6 +160,7 @@ class Eliza:
             else:
                 output.append(reword)
         return output
+        log.debug('Output after reassembly: %s', output)
 
     def _sub(self, words, sub):
         output = []
@@ -160,6 +173,7 @@ class Eliza:
         return output
 
     def _match_key(self, words, key):
+        output = None  # Initialize output with a default value
         for decomp in key.decomps:
             results = self._match_decomp(decomp.parts, words)
             if results is None:
@@ -182,8 +196,10 @@ class Eliza:
                 self.memory.append(output)
                 log.debug('Saved to memory: %s', output)
                 continue
+            log.debug('Matched key: %s', key.word)
+            log.debug('Output before return: %s', output)
             return output
-        return None
+        return output  # Return the output value, which will be None if no match is found
 
     def respond(self, text):
         if text.lower() in self.quits:
@@ -217,10 +233,15 @@ class Eliza:
                 output = self.memory.pop(index)
                 log.debug('Output from memory: %s', output)
             else:
-                output = self._next_reasmb(self.keys['xnone'].decomps[0])
-                log.debug('Output from xnone: %s', output)
+                prompt = " ".join(words)
+                output = self.generate_gpt_response(prompt)
+                log.debug('Output from OpenAI: %s', output)
 
-        return " ".join(output)
+        if isinstance(output, list):
+            output = ' '.join(output)
+
+        return output
+
 
     def initial(self):
         return random.choice(self.initials)
@@ -242,19 +263,33 @@ class Eliza:
 
         print(self.final())
 
-
 def main():
+    print(f"Command-line arguments: {sys.argv}")
     if len(sys.argv) > 1:
         userInput = sys.argv[1]
     else:
-        print("No input provided")
+        userInput = input("Please enter your message: ")
+    try:
+        eliza = Eliza()
+        eliza.load('doctor.txt')
+        response = eliza.respond(userInput)
+        print(f"Original response: {repr(response)}")
+        
+        # Check if the response contains any non-ASCII characters
+        if any(ord(char) > 127 for char in response):
+            print("Response contains non-ASCII characters")
+        else:
+            print("Response does not contain non-ASCII characters")
+        
+        # Try removing any Unicode spacing characters
+        response_cleaned = re.sub(r'[\u2000-\u200F]', '', response)
+        print(f"Response after removing Unicode spacing characters: {repr(response_cleaned)}")
+        
+        sys.stdout.write(response_cleaned + '\n')
+    except Exception as e:
+        logging.exception("An error occurred: %s", str(e))
+        print("Error: Failed to generate response")
         sys.exit(1)
 
-    
-    eliza = Eliza(openai_api_key='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')
-    eliza.load('doctor.txt')
-    print(eliza.respond(userInput))
-
 if __name__ == '__main__':
-    logging.basicConfig()
     main()

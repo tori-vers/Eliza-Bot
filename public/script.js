@@ -198,51 +198,55 @@ function stopSpeechRecognitionEngine() {
 function sendToEliza() {
   let userInputElem = document.getElementById('userInput');
   if (userInputElem) {
-      const userInput = userInputElem.value;
-      if (!userInput) {
-          return Promise.resolve(); // Don't send empty messages
+    const userInput = userInputElem.value;
+    if (!userInput) {
+      return Promise.resolve(); // Don't send empty messages
+    }
+    const timestamp = getCurrentTimestamp();
+    // Add user input to chat history
+    chatHistory.push({ sender: 'User', message: userInput, timestamp });
+    // Update the chat display
+    updateChatDisplay();
+    // Clear the user input
+    userInputElem.value = '';
+    isBotListening = true;
+    
+    // Send user input to Eliza
+    return fetch(`/eliza?input=${encodeURIComponent(userInput)}`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
-      const timestamp = getCurrentTimestamp();
-      // Add user input to chat history
-      chatHistory.push({ sender: 'User', message: userInput, timestamp });
+      return response.text();
+    })
+    .then(data => {
+      isBotListening = false;
+      // Add Eliza's response to chat history
+      chatHistory.push({ sender: 'Eliza', message: data, timestamp });
       // Update the chat display
       updateChatDisplay();
-      // Clear the user input
-      userInputElem.value = '';
-      isBotListening = true;
-      
-              // Send user input to Eliza
-              return fetch(`/eliza?input=${encodeURIComponent(userInput)}`)
-              .then(response => response.text())
-              .then(data => {
-                  isBotListening = false;
-                  // Add Eliza's response to chat history
-                  chatHistory.push({ sender: 'Eliza', message: data, timestamp });
-                  // Update the chat display
-                  updateChatDisplay();
-  
-                  // Generate the talking head lipsync video
-                  return generateLipsync(data);
-              })
-              .then(lipsyncVideoUrl => {
-                  // Update the source of the video element with the new lipsync video URL
-                  let virtualHumanVideo = document.getElementById('virtual-human');
-                  if (virtualHumanVideo) {
-                      virtualHumanVideo.src = lipsyncVideoUrl;
-                  }
-              })
-              .catch(error => {
-                  console.error('Error:', error);
-                  return Promise.reject(error);
-              });
-      } else {
-          return Promise.resolve();
+
+      // Generate the talking head lipsync video
+      return generateLipsync(data);
+    })
+    .then(lipsyncVideoUrl => {
+      // Update the source of the video element with the new lipsync video URL
+      let virtualHumanVideo = document.getElementById('virtual-human');
+      if (virtualHumanVideo) {
+        virtualHumanVideo.src = lipsyncVideoUrl;
       }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+  } else {
+    return Promise.resolve();
   }
+}
   
   function generateLipsync(text) {
-    const apiKey = 'eyJhbGciOiJIUzUxMiJ9.eyJ1c2VybmFtZSI6ImFsZXhkbWF5MTU5OUBnbWFpbC5jb20ifQ.AlH7kFZWAOhGfQwTCZQhWY5HHHnZ1vd8j1pRbzxnwQHW4HvzvoLspTZ7_3MSeWpnNCP6NLJ7rl0TKdPiZNxgOg'; // Replace with your actual API key
-    const idleUrl = 'https://ugc-idle.s3-us-west-2.amazonaws.com/est_1dc88daaa1eb74c1e50d8722328860a3.mp4'; // Replace with your actual idle_url
+    const apiKey = 'eyJhbGciOiJIUzUxMiJ9.eyJ1c2VybmFtZSI6ImFsZXhkbWF5MTU5OUBnbWFpbC5jb20ifQ.AlH7kFZWAOhGfQwTCZQhWY5HHHnZ1vd8j1pRbzxnwQHW4HvzvoLspTZ7_3MSeWpnNCP6NLJ7rl0TKdPiZNxgOg'; 
+    const idleUrl = 'https://ugc-idle.s3-us-west-2.amazonaws.com/est_1dc88daaa1eb74c1e50d8722328860a3.mp4';
     const voiceName = 'Fay'; // Replace with the desired voice name
 
     const options = {
@@ -420,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   
     function searchConversations() {
-      const calendarDateInput = document.getElementById('calendar-date'); // Make sure this ID matches your input's ID in the HTML
+      const calendarDateInput = document.getElementById('calendar-date'); 
       const selectedDate = calendarDateInput.value;
       // Implement conversation search based on selected date
   }

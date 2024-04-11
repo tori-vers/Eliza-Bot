@@ -7,7 +7,7 @@ app.use(express.static('public'));
 
 app.get('/eliza', (req, res) => {
     const userInput = req.query.input;
-    
+
     // Check if userInput is provided
     if (!userInput) {
         // Respond with 400 Bad Request if userInput is missing
@@ -16,24 +16,30 @@ app.get('/eliza', (req, res) => {
     }
     
     const pythonProcess = spawn('python', ['eliza.py', userInput]);
-    
+
     // Collect data from script
     let scriptOutput = '';
     pythonProcess.stdout.on('data', (data) => {
         scriptOutput += data.toString();
     });
 
-    // When the script has finished execution, send back the response
-    pythonProcess.stdout.on('end', () => {
-        // Set Content-Type to 'text/plain'
-        res.type('text/plain');
-        res.send(scriptOutput);
+    pythonProcess.stderr.on('data', (data) => {
+        console.error(`Error from Python script: ${data}`);
     });
 
-    // Handle errors emitted by the Python script
-    pythonProcess.stderr.on('data', (data) => {
-        console.error(`stderr: ${data}`);
-        res.status(500).send('Error executing Eliza script');
+    pythonProcess.on('close', (code) => {
+        if (code !== 0) {
+            console.error(`Python script exited with code ${code}`);
+            console.error(`Script output: ${scriptOutput}`);
+            res.status(500).send('Error executing Eliza script');
+        } else {
+            console.log(`Script output: ${scriptOutput}`);
+            const lines = scriptOutput.trim().split('\n');
+            let lastLine = lines[lines.length - 1];
+            console.log(`Response received from Python script: '${lastLine}'`);
+            // Set Content-Type to 'text/plain'
+            res.type('text/plain').send(lastLine);
+        }
     });
 });
 
