@@ -16,7 +16,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
 
     if (data.success) {
         // Redirect user to another page or perform any other action upon successful login
-        window.location.href = '/chat.html';
+        window.location.href = '/index.html';
     } else {
         // Display error message to the user
         document.getElementById('message').innerText = data.message;
