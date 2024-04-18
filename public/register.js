@@ -16,8 +16,13 @@ document.getElementById('register-form').addEventListener('submit', async functi
     const data = await response.json();
 
     if (data.success) {
+
+
         // Redirect user to the login page
         window.location.href = 'login.html';
+
+
+
     } else {
         // Display error message to the user
         document.getElementById('message').innerText = data.message;

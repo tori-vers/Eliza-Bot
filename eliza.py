@@ -3,6 +3,7 @@ import random
 import re
 import sys
 import openai
+import time  # Added import for time module
 from collections import namedtuple
 
 # Fix Python2/Python3 incompatibility
@@ -241,7 +242,6 @@ class Eliza:
             output = ' '.join(output)
 
         return output
-
 
     def initial(self):
         return random.choice(self.initials)

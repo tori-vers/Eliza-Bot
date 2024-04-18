@@ -15,10 +15,13 @@ document.getElementById('login-form').addEventListener('submit', async function(
     const data = await response.json();
 
     if (data.success) {
-        // Redirect user to another page or perform any other action upon successful login
+
+        localStorage.setItem('user', username)
+
+        // Redirect user to main page 
         window.location.href = '/index.html';
     } else {
-        // Display error message to the user
+
         document.getElementById('message').innerText = data.message;
     }
 });

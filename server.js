@@ -69,7 +69,7 @@ app.post('/register', (req, res) => {
                 return;
             }
             console.log('User registered successfully:', username);
-            res.json({ success: true, message: 'User registered successfully' });
+            res.json({ success: true, message: 'User registered successfully'});
         });
     });
 });
@@ -93,26 +93,61 @@ app.post('/login', (req, res) => {
             return;
         }
         console.log('User authenticated successfully:', username);
-        res.json({ success: true, message: 'User authenticated successfully' });
+        res.json({ success: true, message: 'User authenticated successfully'});
     });
 });
 
 // Endpoint to handle incoming chat messages
 app.post('/send-message', (req, res) => {
-    const { user_id, message } = req.body;
- 
-    // Insert message into chat history table
-    const insertQuery = 'INSERT INTO chat_history (user_id, message) VALUES (?, ?)';
-    connection.query(insertQuery, [user_id, message], (error, results) => {
+    console.log('Received send-message request:', req.body);
+    const { username, message } = req.body;
+
+    // Query to retrieve the user ID based on the username
+    const userQuery = 'SELECT id FROM users WHERE username = ?';
+    connection.query(userQuery, [username], (error, results) => {
         if (error) {
-            console.error('Error inserting message into chat history: ', error);
+            console.error('Error retrieving user ID:', error);
             res.status(500).json({ success: false, message: 'Error sending message' });
             return;
         }
-        console.log('Message sent successfully:', message);
-        res.json({ success: true, message: 'Message sent successfully' });
+        
+        if (results.length === 0) {
+            console.error('User not found');
+            res.status(404).json({ success: false, message: 'User not found' });
+            return;
+        }
+        
+        const userId = results[0].id; // Assuming there's only one user with a given username
+
+        // Insert message into chat_messages table
+        const insertQuery = 'INSERT INTO chat_messages (user_id, message) VALUES (?, ?)';
+        connection.query(insertQuery, [userId, message], (error, results) => {
+            if (error) {
+                console.error('Error inserting message into chat history:', error);
+                res.status(500).json({ success: false, message: 'Error sending message' });
+                return;
+            }
+            console.log('Message sent successfully:', message);
+            res.json({ success: true, message: 'Message sent successfully' });
+        });
     });
 });
+
+// Endpoint to fetch chat history based on date
+app.get('/chat-history', (req, res) => {
+    const { date } = req.query;
+    const query = 'SELECT * FROM chat_messages WHERE DATE(timestamp) = ?';
+    connection.query(query, [date], (error, results) => {
+        if (error) {
+            console.error('Error fetching chat history:', error);
+            res.status(500).json({ success: false, message: 'Error fetching chat history' });
+            return;
+        }
+        res.json(results); 
+    });
+});
+
+
 
 // Eliza endpoint
 app.get('/eliza', (req, res) => {
@@ -125,7 +160,7 @@ app.get('/eliza', (req, res) => {
         return;
     }
     
-    const pythonProcess = spawn('python', ['eliza.py', userInput]);
+    const pythonProcess = spawn('python3', ['eliza.py', userInput]);
 
     // Collect data from script
     let scriptOutput = '';
