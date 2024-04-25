@@ -6,246 +6,272 @@ let isBotListening = false;
 const idleVideoUrl = 'https://ugc-idle.s3-us-west-2.amazonaws.com/est_1dc88daaa1eb74c1e50d8722328860a3.mp4';
 
 if (typeof window !== 'undefined' && typeof window.document !== 'undefined') {
-   window.addEventListener('DOMContentLoaded', (event) => {
-       const userInputElem = document.getElementById('userInput');
-       if (userInputElem) {
-         userInputElem.addEventListener('keyup', function (event) {
-           if (event.key === 'Enter') {
-             sendToEliza();
-           }
-       });
-   }
-});
+    window.addEventListener('DOMContentLoaded', (event) => {
+        const userInputElem = document.getElementById('userInput');
+        if (userInputElem) {
+            userInputElem.addEventListener('keyup', function (event) {
+                if (event.key === 'Enter') {
+                    sendToEliza();
+                }
+            });
+        }
+    });
 }
 
 
 // Function to toggle between text and speech input mode
 function toggleInputMode() {
-   const textInputContainer = document.getElementById('input-container');
-   const speechBtn = document.getElementById('speech-btn');
+    const textInputContainer = document.getElementById('input-container');
+    const speechBtn = document.getElementById('speech-btn');
 
 
-   // Toggle the input mode
-   isSpeechMode = !isSpeechMode;
+    // Toggle the input mode
+    isSpeechMode = !isSpeechMode;
 
 
-   if (isSpeechMode) {
-       // Start listening indicator
-       const listeningIndicator = document.getElementById('listening-indicator');
-       startListeningIndicator(listeningIndicator);
+    if (isSpeechMode) {
+        // Start listening indicator
+        const listeningIndicator = document.getElementById('listening-indicator');
+        startListeningIndicator(listeningIndicator);
 
 
-       // Hide the text input container
-       textInputContainer.style.display = 'none';
-   } else {
-       // Stop listening indicator
-       stopListeningIndicator();
+        // Hide the text input container
+        textInputContainer.style.display = 'none';
+    } else {
+        // Stop listening indicator
+        stopListeningIndicator();
 
 
-       // Show the text input container
-       textInputContainer.style.display = 'flex';
-   }
+        // Show the text input container
+        textInputContainer.style.display = 'flex';
+    }
 
 
-   // Update the button text based on the selected mode
-   speechBtn.innerText = isSpeechMode ? 'Stop Speech' : 'Speech';
+    // Update the button text based on the selected mode
+    speechBtn.innerText = isSpeechMode ? 'Stop Speech' : 'Speech';
 
 
-   // If switching from speech mode, stop speech recognition
-   if (!isSpeechMode) {
-       stopSpeechRecognitionEngine();
-   }
+    // If switching from speech mode, stop speech recognition
+    if (!isSpeechMode) {
+        stopSpeechRecognitionEngine();
+    }
 
 
 }
 
 
 function updateChatDisplay() {
-   const chatContainer = document.getElementById('chat-history-container');
-   chatContainer.innerHTML = '';
+    const chatContainer = document.getElementById('chat-history-container');
+    chatContainer.innerHTML = '';
 
+    if (isBotListening) {
+        const listeningMessage = document.createElement('div');
+        listeningMessage.className = 'eliza';
+        listeningMessage.innerHTML = 'Listening...';
+        chatContainer.appendChild(listeningMessage);
+    }
 
+    // Display chat history
+    chatHistory.forEach(entry => {
+        const messageElement = document.createElement('div');
+        messageElement.className = entry.sender.toLowerCase();
 
+        const timestampElement = document.createElement('span');
+        timestampElement.className = 'timestamp';
+        timestampElement.innerText = `[${entry.timestamp}]`;
 
-   if (isBotListening) {
-       const listeningMessage = document.createElement('div');
-       listeningMessage.className = 'eliza';
-       listeningMessage.innerHTML = 'Listening...';
-       chatContainer.appendChild(listeningMessage);
-   }
+        messageElement.innerHTML = `<strong>${entry.sender}:</strong> ${entry.message}`;
+        messageElement.appendChild(timestampElement);
 
-
-   // Display chat history
-   chatHistory.forEach(entry => {
-       const messageElement = document.createElement('div');
-       messageElement.className = entry.sender.toLowerCase();
-
-
-       const timestampElement = document.createElement('span');
-       timestampElement.className = 'timestamp';
-       timestampElement.innerText = `[${entry.timestamp}]`;
-
-
-       messageElement.innerHTML = `<strong>${entry.sender}:</strong> ${entry.message}`;
-       messageElement.appendChild(timestampElement);
-
-
-       chatContainer.appendChild(messageElement);
-   });
+        chatContainer.appendChild(messageElement);
+    });
 }
 
 
 function getCurrentTimestamp() {
-   const now = new Date();
-   const timestamp = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()} ${now.toDateString()}`;
-   return timestamp;
+    const now = new Date();
+    const timestamp = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()} ${now.toDateString()}`;
+    return timestamp;
 }
 function startSpeechRecognition() {
-   const speechBtn = document.getElementById('speech-btn');
-   const listeningIndicator = document.getElementById('listening-indicator');
+    const speechBtn = document.getElementById('speech-btn');
+    const listeningIndicator = document.getElementById('listening-indicator');
 
 
-   if (!isSpeechMode) {
-       startListeningIndicator(listeningIndicator);
-       recognition = new webkitSpeechRecognition();
-       startSpeechRecognitionEngine();
-       speechBtn.innerHTML = 'Stop';
-   } else {
-       stopListeningIndicator();
-       stopSpeechRecognitionEngine();
-       speechBtn.innerHTML = 'Mic';
+    if (!isSpeechMode) {
+        startListeningIndicator(listeningIndicator);
+        recognition = new webkitSpeechRecognition();
+        startSpeechRecognitionEngine();
+        speechBtn.innerHTML = 'Stop';
+    } else {
+        stopListeningIndicator();
+        stopSpeechRecognitionEngine();
+        speechBtn.innerHTML = 'Mic';
     }
 
 
-   isSpeechMode = !isSpeechMode;
+    isSpeechMode = !isSpeechMode;
 }
 
 
 function startListeningIndicator() {
-  let ellipsesCount = 1;
-  listeningIndicatorInterval = setInterval(() => {
-      let listeningIndicatorElem = document.getElementById('listening-indicator');
-      if (!listeningIndicatorElem) {
-          listeningIndicatorElem = document.createElement('div');
-          listeningIndicatorElem.id = 'listening-indicator';
-          const chatLogContainer = document.getElementById('chat-log-container');
-          if (chatLogContainer) {
-              chatLogContainer.appendChild(listeningIndicatorElem);
-          }
-      }
-      const ellipses = '.'.repeat(ellipsesCount);
-      listeningIndicatorElem.innerText = isBotListening ? `Listening${ellipses}` : '';
-      ellipsesCount = (ellipsesCount % 3) + 1;
-  }, 500);
+    let ellipsesCount = 1;
+    listeningIndicatorInterval = setInterval(() => {
+        let listeningIndicatorElem = document.getElementById('listening-indicator');
+        if (!listeningIndicatorElem) {
+            listeningIndicatorElem = document.createElement('div');
+            listeningIndicatorElem.id = 'listening-indicator';
+            const chatLogContainer = document.getElementById('chat-log-container');
+            if (chatLogContainer) {
+                chatLogContainer.appendChild(listeningIndicatorElem);
+            }
+        }
+        const ellipses = '.'.repeat(ellipsesCount);
+        listeningIndicatorElem.innerText = isBotListening ? `Listening${ellipses}` : '';
+        ellipsesCount = (ellipsesCount % 3) + 1;
+    }, 500);
 }
 
 
 function stopListeningIndicator() {
-  clearInterval(listeningIndicatorInterval);
-  const listeningIndicatorElem = document.getElementById('listening-indicator');
-  if (listeningIndicatorElem) {
-      listeningIndicatorElem.innerText = ''; // Clear the text only if the element exists
-  }
+    clearInterval(listeningIndicatorInterval);
+    const listeningIndicatorElem = document.getElementById('listening-indicator');
+    if (listeningIndicatorElem) {
+        listeningIndicatorElem.innerText = ''; // Clear the text only if the element exists
+    }
 }
 
 
 function startSpeechRecognitionEngine() {
-   recognition.continuous = true;
+    recognition.continuous = true;
 
 
-   recognition.onstart = function () {
-       console.log('Speech recognition started');
-   };
+    recognition.onstart = function () {
+        console.log('Speech recognition started');
+    };
 
 
-   recognition.onresult = function (event) {
-       const last = event.results.length - 1;
-       const spokenText = event.results[last][0].transcript;
+    recognition.onresult = function (event) {
+        const last = event.results.length - 1;
+        const spokenText = event.results[last][0].transcript;
 
 
-       document.getElementById('userInput').value = spokenText;
+        document.getElementById('userInput').value = spokenText;
 
 
-       // Trigger the sendToEliza function when speech recognition is successful
-       sendToEliza();
-   };
+        // Trigger the sendToEliza function when speech recognition is successful
+        sendToEliza();
+    };
 
 
-   recognition.onerror = function (event) {
-       console.error('Speech recognition error', event.error);
-       stopSpeechRecognitionEngine();
-   };
+    recognition.onerror = function (event) {
+        console.error('Speech recognition error', event.error);
+        stopSpeechRecognitionEngine();
+    };
 
 
-   recognition.onend = function () {
-       console.log('Speech recognition ended');
-       if (isSpeechMode) {
-           startSpeechRecognitionEngine();
-       }
-   };
+    recognition.onend = function () {
+        console.log('Speech recognition ended');
+        if (isSpeechMode) {
+            startSpeechRecognitionEngine();
+        }
+    };
 
 
-   recognition.start();
+    recognition.start();
 }
 
 
 function stopSpeechRecognitionEngine() {
-   recognition.stop();
+    recognition.stop();
 }
 
 
 // Updated sendToEliza function to handle both text and speech input
-function sendToEliza() {
-  let userInputElem = document.getElementById('userInput');
-  if (userInputElem) {
-    const userInput = userInputElem.value;
-    if (!userInput) {
-      return Promise.resolve(); // Don't send empty messages
-    }
-    const timestamp = getCurrentTimestamp();
-    // Add user input to chat history
-    chatHistory.push({ sender: 'User', message: userInput, timestamp });
-    // Update the chat display
-    updateChatDisplay();
-    // Clear the user input
-    userInputElem.value = '';
-    isBotListening = true;
-    
-    // Send user input to Eliza
-    return fetch(`/eliza?input=${encodeURIComponent(userInput)}`)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.text();
-    })
-    .then(data => {
-      isBotListening = false;
-      // Add Eliza's response to chat history
-      chatHistory.push({ sender: 'Eliza', message: data, timestamp });
-      // Update the chat display
-      updateChatDisplay();
+async function sendToEliza() {
+    let userInputElem = document.getElementById('userInput');
+    if (userInputElem) {
+        const userInput = userInputElem.value;
+        if (!userInput) {
+            return Promise.resolve(); // Don't send empty messages
+        }
+        const timestamp = getCurrentTimestamp();
+        // Add user input to chat history
+        chatHistory.push({ sender: 'User', message: userInput, timestamp });
+        // Update the chat display
+        updateChatDisplay();
+        // Clear the user input
+        userInputElem.value = '';
+        isBotListening = true;
 
-      // Generate the talking head lipsync video
-      return generateLipsync(data);
-    })
-    .then(lipsyncVideoUrl => {
-      // Update the source of the video element with the new lipsync video URL
-      let virtualHumanVideo = document.getElementById('virtual-human');
-      if (virtualHumanVideo) {
-        virtualHumanVideo.src = lipsyncVideoUrl;
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
-  } else {
-    return Promise.resolve();
-  }
+        try {
+            // Send user input to Eliza
+            const response = await fetch(`/eliza?input=${encodeURIComponent(userInput)}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+
+            isBotListening = false;
+            const responseChunks = data.chunks;
+
+            // Add Eliza's response chunks to chat history
+            responseChunks.forEach(chunk => {
+                chatHistory.push({ sender: 'Eliza', message: chunk, timestamp });
+            });
+
+            // Update the chat display
+            updateChatDisplay();
+
+            // Play the lipsync videos sequentially
+            const virtualHumanVideo = document.getElementById('virtual-human');
+
+            for (let i = 0; i < responseChunks.length; i++) {
+                const chunk = responseChunks[i];
+                try {
+                    console.log('Generating lipsync video for chunk:', chunk);
+                    const videoUrl = await generateLipsync(chunk);
+                    console.log('Generated lipsync video URL:', videoUrl);
+                    virtualHumanVideo.src = videoUrl;
+                    console.log('Set video source to:', videoUrl);
+        
+                    await new Promise((resolve, reject) => {
+                        virtualHumanVideo.onloadeddata = () => {
+                            console.log('Video loaded');
+                            virtualHumanVideo.loop = false; // Disable looping
+                            virtualHumanVideo.play().then(() => {
+                                console.log('Video started playing');
+                                setTimeout(resolve, virtualHumanVideo.duration * 1000);
+                            }).catch((error) => {
+                                console.error('Error starting video playback:', error);
+                                reject(error);
+                            });
+                        };
+                        virtualHumanVideo.onended = () => {
+                            console.log('Video ended');
+                            virtualHumanVideo.pause(); // Pause the video when it ends
+                        };
+                        virtualHumanVideo.onerror = (error) => {
+                            console.error('Video error:', error);
+                            reject(error);
+                        };
+                    });
+                } catch (error) {
+                    console.error('Error generating or playing lipsync video:', error);
+                }
+            }
+        
+            switchToIdleVideo();
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 }
-  
-  function generateLipsync(text) {
-    const apiKey = 'eyJhbGciOiJIUzUxMiJ9.eyJ1c2VybmFtZSI6ImFsZXhkbWF5MTU5OUBnbWFpbC5jb20ifQ.AlH7kFZWAOhGfQwTCZQhWY5HHHnZ1vd8j1pRbzxnwQHW4HvzvoLspTZ7_3MSeWpnNCP6NLJ7rl0TKdPiZNxgOg'; 
+
+
+
+function generateLipsync(text) {
+    const apiKey = 'eyJhbGciOiJIUzUxMiJ9.eyJ1c2VybmFtZSI6ImFsZXhkbWF5MTU5OUBnbWFpbC5jb20ifQ.AlH7kFZWAOhGfQwTCZQhWY5HHHnZ1vd8j1pRbzxnwQHW4HvzvoLspTZ7_3MSeWpnNCP6NLJ7rl0TKdPiZNxgOg';
     const idleUrl = 'https://ugc-idle.s3-us-west-2.amazonaws.com/est_1dc88daaa1eb74c1e50d8722328860a3.mp4';
     const voiceName = 'Fay'; // Replace with the desired voice name
 
@@ -265,83 +291,84 @@ function sendToEliza() {
     };
 
     return fetch('https://api.exh.ai/animations/v3/generate_lipsync', options)
-    .then(response => {
-        if (!response.ok) {
-            // If the response is not OK, throw an error with the status text
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        // Check if the response content type is video/mp4
-        if (response.headers.get('Content-Type').includes('video/mp4')) {
-            return response.blob(); // If it's a video file, get a blob
-        } else {
-            return response.json(); // Otherwise, parse it as JSON
-        }
-    })
-    .then(data => {
-        if (data instanceof Blob) {
-            // Create a URL for the video blob
-            const videoUrl = URL.createObjectURL(data);
-            return videoUrl;
-        } else {
-            // If the response is JSON, handle it as needed
-            // Assuming the JSON contains a property with the video URL
-            if (typeof data === 'object' && data.lipsyncVideoUrl) {
-                return data.lipsyncVideoUrl;
-            } else {
-                console.error('Unexpected response structure:', data);
-                return Promise.reject('Unexpected response structure.');
+        .then(response => {
+            if (!response.ok) {
+                // If the response is not OK, throw an error with the status text
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        }
-    })
-    .catch(error => {
-        console.error('Error in generateLipsync:', error);
-        throw error;
-    });
+            // Check if the response content type is video/mp4
+            if (response.headers.get('Content-Type').includes('video/mp4')) {
+                return response.blob(); // If it's a video file, get a blob
+            } else {
+                return response.json(); // Otherwise, parse it as JSON
+            }
+        })
+        .then(data => {
+            if (data instanceof Blob) {
+                // Create a URL for the video blob
+                const videoUrl = URL.createObjectURL(data);
+                console.log('Generated lipsync video URL:', videoUrl);
+                return videoUrl;
+            } else {
+                // If the response is JSON, handle it as needed
+                // Assuming the JSON contains a property with the video URL
+                if (typeof data === 'object' && data.lipsyncVideoUrl) {
+                    return data.lipsyncVideoUrl;
+                } else {
+                    console.error('Unexpected response structure:', data);
+                    return Promise.reject('Unexpected response structure.');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error in generateLipsync:', error);
+            throw error;
+        });
 }
 
 // Function to switch to the idle video
 function switchToIdleVideo() {
-  console.log('Attempting to switch to idle video.');
-  const virtualHumanVideo = document.getElementById('virtual-human');
-  if (virtualHumanVideo) {
-      virtualHumanVideo.src = idleVideoUrl;
-      virtualHumanVideo.loop = true;
-      virtualHumanVideo.load(); // Ensure this call is here
-      virtualHumanVideo.play().then(() => {
-          console.log('Idle video is playing.');
-      }).catch((error) => {
-          console.error('Error playing the idle video:', error);
-      });
-  } else {
-      console.error('Failed to find the virtual-human video element for idle video.');
-  }
+    console.log('Attempting to switch to idle video.');
+    const virtualHumanVideo = document.getElementById('virtual-human');
+    if (virtualHumanVideo) {
+        virtualHumanVideo.src = idleVideoUrl;
+        virtualHumanVideo.loop = true;
+        virtualHumanVideo.load(); // Ensure this call is here
+        virtualHumanVideo.play().then(() => {
+            console.log('Idle video is playing.');
+        }).catch((error) => {
+            console.error('Error playing the idle video:', error);
+        });
+    } else {
+        console.error('Failed to find the virtual-human video element for idle video.');
+    }
 }
 
 function updateTalkingHead(videoUrl) {
-  console.log('updateTalkingHead called with URL:', videoUrl);
-  const virtualHumanVideo = document.getElementById('virtual-human');
-  if (virtualHumanVideo) {
-      const cacheBustingUrl = videoUrl + '?t=' + new Date().getTime();
-      console.log('Setting video source to:', cacheBustingUrl);
-      
-      virtualHumanVideo.src = cacheBustingUrl;
-      virtualHumanVideo.loop = false;
+    console.log('updateTalkingHead called with URL:', videoUrl);
+    const virtualHumanVideo = document.getElementById('virtual-human');
+    if (virtualHumanVideo) {
+        const cacheBustingUrl = videoUrl + '?t=' + new Date().getTime();
+        console.log('Setting video source to:', cacheBustingUrl);
 
-      virtualHumanVideo.load();
+        virtualHumanVideo.src = cacheBustingUrl;
+        virtualHumanVideo.loop = false;
 
-      virtualHumanVideo.onended = () => {
-          console.log('Talking head video ended. About to switch to idle video.');
-          switchToIdleVideo();
-      };
+        virtualHumanVideo.load();
 
-      virtualHumanVideo.play().then(() => {
-          console.log('Talking head video is playing.');
-      }).catch((error) => {
-          console.error('Error playing the talking head video:', error);
-      });
-  } else {
-      console.error('Failed to find the virtual-human video element for talking head video.');
-  }
+        virtualHumanVideo.onended = () => {
+            console.log('Talking head video ended. About to switch to idle video.');
+            switchToIdleVideo();
+        };
+
+        virtualHumanVideo.play().then(() => {
+            console.log('Talking head video is playing.');
+        }).catch((error) => {
+            console.error('Error playing the talking head video:', error);
+        });
+    } else {
+        console.error('Failed to find the virtual-human video element for talking head video.');
+    }
 }
 
 
@@ -353,89 +380,89 @@ let virtualHumanVideo;
 let searchButton;
 
 
-document.addEventListener('DOMContentLoaded', function() {
-  calendarDateInput = document.getElementById('calendar-date');
-  miniCalendar = document.getElementById('mini-calendar');
-  monthYearDisplay = document.getElementById('month-year');
-  calendarBody = document.getElementById('calendar-body');
-  virtualHumanVideo = document.getElementById('virtual-human');
-  searchButton = document.getElementById('search-button');
+document.addEventListener('DOMContentLoaded', function () {
+    calendarDateInput = document.getElementById('calendar-date');
+    miniCalendar = document.getElementById('mini-calendar');
+    monthYearDisplay = document.getElementById('month-year');
+    calendarBody = document.getElementById('calendar-body');
+    virtualHumanVideo = document.getElementById('virtual-human');
+    searchButton = document.getElementById('search-button');
 
-  // If calendarBody exists, then we can generate the calendar.
-  if (calendarBody) {
-    const currentDate = new Date();
-    generateCalendar(currentDate.getFullYear(), currentDate.getMonth());
-  }
+    // If calendarBody exists, then we can generate the calendar.
+    if (calendarBody) {
+        const currentDate = new Date();
+        generateCalendar(currentDate.getFullYear(), currentDate.getMonth());
+    }
 
-  // If searchButton exists, add an event listener
-  if (searchButton) {
-    searchButton.addEventListener('click', searchConversations);
-  }
+    // If searchButton exists, add an event listener
+    if (searchButton) {
+        searchButton.addEventListener('click', searchConversations);
+    }
 
-  // Other initialization code...
+    // Other initialization code...
 });
 
-    function generateCalendar(year, month) {
-      // Clear previous calendar
-      let currentDate = new Date();
-      calendarBody.innerHTML = '';
-      monthYearDisplay.textContent = `${getMonthName(month)} ${year}`;
-      
-      const firstDayOfMonth = new Date(year, month, 1);
-      const lastDayOfMonth = new Date(year, month + 1, 0);
-      const daysInMonth = lastDayOfMonth.getDate();
-      const startingDay = firstDayOfMonth.getDay();
-  
-      let date = 1;
-  
-      for (let i = 0; i < 6; i++) {
+function generateCalendar(year, month) {
+    // Clear previous calendar
+    let currentDate = new Date();
+    calendarBody.innerHTML = '';
+    monthYearDisplay.textContent = `${getMonthName(month)} ${year}`;
+
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+    const daysInMonth = lastDayOfMonth.getDate();
+    const startingDay = firstDayOfMonth.getDay();
+
+    let date = 1;
+
+    for (let i = 0; i < 6; i++) {
         const row = document.createElement('tr');
         for (let j = 0; j < 7; j++) {
-          if (i === 0 && j < startingDay) {
-            const cell = document.createElement('td');
-            row.appendChild(cell);
-          } else if (date > daysInMonth) {
-            break;
-          } else {
-            const cell = document.createElement('td');
-            cell.textContent = date;
-            cell.dataset.date = `${year}-${padZero(month + 1)}-${padZero(date)}`;
-            cell.addEventListener('click', handleDateClick);
-            row.appendChild(cell);
-            date++;
-          }
+            if (i === 0 && j < startingDay) {
+                const cell = document.createElement('td');
+                row.appendChild(cell);
+            } else if (date > daysInMonth) {
+                break;
+            } else {
+                const cell = document.createElement('td');
+                cell.textContent = date;
+                cell.dataset.date = `${year}-${padZero(month + 1)}-${padZero(date)}`;
+                cell.addEventListener('click', handleDateClick);
+                row.appendChild(cell);
+                date++;
+            }
         }
         calendarBody.appendChild(row);
-      }
     }
-  
-    function getMonthName(month) {
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-      return monthNames[month];
-    }
-  
-    function padZero(num) {
-      return num < 10 ? `0${num}` : num;
-    }
-  
-    function handleDateClick(event) {
-      const selectedDate = event.target.dataset.date;
-      calendarDateInput.value = selectedDate;
-    }
-  
-    function searchConversations() {
-      const calendarDateInput = document.getElementById('calendar-date'); 
-      const selectedDate = calendarDateInput.value;
-      // Implement conversation search based on selected date
-  }
-  
-  
-  // Module exports
-  if (typeof module !== 'undefined' && module.exports) {
-      module.exports = {
-          chatHistory,
-          updateChatDisplay,
-          sendToEliza,
-          generateCalendar
-      };
-    }
+}
+
+function getMonthName(month) {
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return monthNames[month];
+}
+
+function padZero(num) {
+    return num < 10 ? `0${num}` : num;
+}
+
+function handleDateClick(event) {
+    const selectedDate = event.target.dataset.date;
+    calendarDateInput.value = selectedDate;
+}
+
+function searchConversations() {
+    const calendarDateInput = document.getElementById('calendar-date');
+    const selectedDate = calendarDateInput.value;
+    // Implement conversation search based on selected date
+}
+
+
+// Module exports
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        chatHistory,
+        updateChatDisplay,
+        sendToEliza,
+        generateCalendar
+    };
+}

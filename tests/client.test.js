@@ -6,15 +6,16 @@ const { sendToEliza, updateChatDisplay, chatHistory } = require('../public/scrip
 
 // Mock the global fetch function
 beforeEach(() => {
-    global.fetch = jest.fn(() => Promise.resolve({
-        text: () => Promise.resolve('Mocked Eliza response')
-    }));
-    // Reset the chatHistory array before each test
-    chatHistory.length = 0;
-    document.body.innerHTML = `
-        <input type="text" id="userInput">
-        <div id="chat-history-container"></div>
-    `;
+  global.fetch = jest.fn(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ chunks: ['How can I assist you today?'] })
+  }));
+  // Reset the chatHistory array before each test
+  chatHistory.length = 0;
+  document.body.innerHTML = `
+      <input type="text" id="userInput">
+      <div id="chat-history-container"></div>
+  `;
 });
 
 // Test suite for the sendToEliza function on the client-side
@@ -31,7 +32,7 @@ describe('sendToEliza', () => {
         // Now that the fetch Promise has been resolved, we can test the chatContainer content
         const chatContainer = document.getElementById('chat-history-container');
         expect(chatContainer.textContent).toContain('Hello');
-        expect(chatContainer.textContent).toContain('Mocked Eliza response');
+        expect(chatContainer.textContent).toContain('How can I assist you today?');
     });
 
     // Additional tests for sendToEliza function...

@@ -14,7 +14,7 @@ app.get('/eliza', (req, res) => {
         res.status(400).send('Input is required');
         return;
     }
-    
+
     const pythonProcess = spawn('python', ['eliza.py', userInput]);
 
     // Collect data from script
@@ -30,16 +30,15 @@ app.get('/eliza', (req, res) => {
     pythonProcess.on('close', (code) => {
         if (code !== 0) {
             console.error(`Python script exited with code ${code}`);
-            console.error(`Script output: ${scriptOutput}`);
             res.status(500).send('Error executing Eliza script');
-        } else {
-            console.log(`Script output: ${scriptOutput}`);
-            const lines = scriptOutput.trim().split('\n');
-            let lastLine = lines[lines.length - 1];
-            console.log(`Response received from Python script: '${lastLine}'`);
-            // Set Content-Type to 'text/plain'
-            res.type('text/plain').send(lastLine);
+            return;
         }
+
+        const responseChunks = scriptOutput.trim().split('\n');
+        console.log(`Response chunks received from Python script: ${responseChunks}`);
+
+        // Set Content-Type to 'application/json'
+        res.type('application/json').json({ chunks: responseChunks });
     });
 });
 

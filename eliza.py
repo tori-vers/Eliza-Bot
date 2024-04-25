@@ -3,6 +3,8 @@ import random
 import re
 import sys
 import openai
+import os
+import time
 from collections import namedtuple
 
 # Fix Python2/Python3 incompatibility
@@ -15,8 +17,15 @@ except NameError:
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)  # Set the logging level as needed
 log = logging.getLogger(__name__)  # Instantiate a logger object
 
+logging.getLogger('openai').setLevel(logging.WARNING)
+logging.getLogger('urllib3').setLevel(logging.WARNING)
+
 # Initialize OpenAI API
-openai.api_key = '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'
+openai.api_key = os.getenv('OPENAI_API_KEY')
+
+if openai.api_key is None:
+    print("Warning: OpenAI API key is not set. Please set the OPENAI_API_KEY environment variable.")
+    sys.exit(1)
 
 class Key:
     def __init__(self, word, weight, decomps):
@@ -42,6 +51,11 @@ class Eliza:
         self.keys = {}
         self.memory = []
 
+    def split_response(self, response):
+        sentences = re.split(r'(?<=[.!?])\s+', response)
+        chunks = [sentence.strip() for sentence in sentences if sentence.strip()]
+        return chunks
+    
     def generate_gpt_response(self, prompt, max_retries=3, retry_delay=5):
         retries = 0
         while retries < max_retries:
@@ -49,7 +63,7 @@ class Eliza:
                 response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=[{"role": "user", "content": prompt}],
-                    max_tokens=60,
+                    max_tokens=150,
                     n=1,
                     stop=None,
                     temperature=0.7,
@@ -58,7 +72,6 @@ class Eliza:
             except openai.error.RateLimitError as e:
                 if retries < max_retries - 1:
                     retries += 1
-                    print(f"Rate limit exceeded. Retrying in {retry_delay} seconds... (Attempt {retries}/{max_retries})")
                     time.sleep(retry_delay)
                 else:
                     raise e
@@ -208,39 +221,37 @@ class Eliza:
         text = re.sub(r'\s*\.+\s*', ' . ', text)
         text = re.sub(r'\s*,+\s*', ' , ', text)
         text = re.sub(r'\s*;+\s*', ' ; ', text)
-        log.debug('After punctuation cleanup: %s', text)
 
         words = [w for w in text.split(' ') if w]
-        log.debug('Input: %s', words)
 
         words = self._sub(words, self.pres)
-        log.debug('After pre-substitution: %s', words)
 
-        keys = [self.keys[w.lower()] for w in words if w.lower() in self.keys]
-        keys = sorted(keys, key=lambda k: -k.weight)
-        log.debug('Sorted keys: %s', [(k.word, k.weight) for k in keys])
+        prompt = " ".join(words)
 
-        output = None
+        try:
+            output = self.generate_gpt_response(prompt)
+        except Exception as e:
+            output = None
 
-        for key in keys:
-            output = self._match_key(words, key)
-            if output:
-                log.debug('Output from key: %s', output)
-                break
+        if not output:
+            keys = [self.keys[w.lower()] for w in words if w.lower() in self.keys]
+            keys = sorted(keys, key=lambda k: -k.weight)
+
+            for key in keys:
+                output = self._match_key(words, key)
+                if output:
+                    break
+
         if not output:
             if self.memory:
                 index = random.randrange(len(self.memory))
                 output = self.memory.pop(index)
-                log.debug('Output from memory: %s', output)
-            else:
-                prompt = " ".join(words)
-                output = self.generate_gpt_response(prompt)
-                log.debug('Output from OpenAI: %s', output)
 
         if isinstance(output, list):
             output = ' '.join(output)
 
-        return output
+        response_chunks = self.split_response(output)
+        return response_chunks
 
 
     def initial(self):
@@ -264,7 +275,6 @@ class Eliza:
         print(self.final())
 
 def main():
-    print(f"Command-line arguments: {sys.argv}")
     if len(sys.argv) > 1:
         userInput = sys.argv[1]
     else:
@@ -272,22 +282,10 @@ def main():
     try:
         eliza = Eliza()
         eliza.load('doctor.txt')
-        response = eliza.respond(userInput)
-        print(f"Original response: {repr(response)}")
-        
-        # Check if the response contains any non-ASCII characters
-        if any(ord(char) > 127 for char in response):
-            print("Response contains non-ASCII characters")
-        else:
-            print("Response does not contain non-ASCII characters")
-        
-        # Try removing any Unicode spacing characters
-        response_cleaned = re.sub(r'[\u2000-\u200F]', '', response)
-        print(f"Response after removing Unicode spacing characters: {repr(response_cleaned)}")
-        
-        sys.stdout.write(response_cleaned + '\n')
+        response_chunks = eliza.respond(userInput)
+        for chunk in response_chunks:
+            print(chunk)
     except Exception as e:
-        logging.exception("An error occurred: %s", str(e))
         print("Error: Failed to generate response")
         sys.exit(1)
 

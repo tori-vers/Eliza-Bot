@@ -1,0 +1,109 @@
+commit ba36b3200a50ba8ad57ba5437d7593d04b4ae3b6
+Author: ADM1299 <alexdmay1599@gmail.com>
+Date:   Thu Apr 11 00:25:34 2024 -0400
+
+    OpenAI Responses
+    
+    Included gpt3.5 turbo responses
+
+commit 6bc87e476108b2aa2f912f900345b3feb658a208
+Author: ADM1299 <alexdmay1599@gmail.com>
+Date:   Wed Apr 10 18:50:02 2024 -0400
+
+    Testing/Virtual Human
+    
+    Added additional testing for frontend//Added Virtual Chat Feature(Beta)
+
+commit e3df84732748f2a61c0939b4b6d8781311c90a72
+Author: Robert C Upton <ru00664@georgiasouthern.edu>
+Date:   Wed Apr 10 16:11:57 2024 -0400
+
+    Expanding Eliza Library
+
+commit 69fdeee7f556cd48cf613a7d3f393da52a7d719a
+Author: erykahj <107901380+erykahj@users.noreply.github.com>
+Date:   Tue Apr 9 18:21:41 2024 -0400
+
+    minor fixes
+
+commit 5db8148b133e723d44fa41e17e137269e59a994b
+Author: erykahj <107901380+erykahj@users.noreply.github.com>
+Date:   Tue Apr 9 17:48:16 2024 -0400
+
+    register update
+
+commit 3883229e13f8090fb45098220f22bf9958a99a0f
+Author: erykahj <107901380+erykahj@users.noreply.github.com>
+Date:   Tue Apr 9 17:26:44 2024 -0400
+
+    style for log in page
+
+commit cb5e017db46a83b5ba5b636134336702177daa55
+Author: erykahj <107901380+erykahj@users.noreply.github.com>
+Date:   Tue Apr 9 16:32:41 2024 -0400
+
+    added Tori's login/registration pages
+
+commit 22e2bd60f5627c4b0353d608577de233906636e2
+Author: erykahj <107901380+erykahj@users.noreply.github.com>
+Date:   Tue Apr 9 15:22:18 2024 -0400
+
+    calendar search
+
+commit 44c42deed304a3b9a2d5832edae08082c3f05035
+Author: erykahj <107901380+erykahj@users.noreply.github.com>
+Date:   Tue Apr 9 14:52:10 2024 -0400
+
+    chat log working
+
+commit 529464aa5193c78d37282d8246c7c1cae06516d6
+Author: erykahj <107901380+erykahj@users.noreply.github.com>
+Date:   Mon Apr 8 19:17:36 2024 -0400
+
+    updated front end
+    
+    still working on functions
+
+commit 31a8e538f7d39a342fb325b68fc970e0d946b5c2
+Author: ADM1299 <alexdmay1599@gmail.com>
+Date:   Tue Mar 5 00:11:25 2024 -0500
+
+    Prelim Unit Testing
+    
+    Added Testing for Client and Server
+
+commit bf0273ee2b89be2a3f00eeacda1992f4ba858735
+Author: erykahj <107901380+erykahj@users.noreply.github.com>
+Date:   Mon Mar 4 00:17:01 2024 -0500
+
+    Initial Updates
+    
+    Basic style and speech to text
+
+commit 887e8fdb49dd0e5aa3c5fb4c9855d2b1bcb5314a
+Author: Alexander May <93697624+ADM1299@users.noreply.github.com>
+Date:   Mon Feb 26 20:14:38 2024 -0500
+
+    Update README.md
+
+commit fb4fdbf53534ea62cee7e9b7a06eb86f6bbccb7d
+Author: ADM1299 <alexdmay1599@gmail.com>
+Date:   Mon Feb 26 20:13:25 2024 -0500
+
+    Commit 1
+    
+    +Server logic using Node.js and Express
+    +Basic HTML and Styling
+    +Script for displaying bot on local port
+
+commit 781877df16a634480e6d5fdc493685808fa0bc77
+Author: Victoria Versteegh <120139396+tori-vers@users.noreply.github.com>
+Date:   Mon Jan 29 10:04:42 2024 -0500
+
+    Add files via upload
+
+commit 1f9d088c77c904f5831c6ffac7e1f9f60b88e21d
+Author: Victoria Versteegh <120139396+tori-vers@users.noreply.github.com>
+Date:   Mon Jan 29 09:57:19 2024 -0500
+
+    Initial commit
